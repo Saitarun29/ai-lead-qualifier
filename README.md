@@ -1,55 +1,49 @@
-# AI Lead Qualifier
+<div align="center">
 
-**Every inbound lead scored, routed and answered in seconds, not hours.** An AI qualification system that scores each lead 0–100, sorts it into Hot / Warm / Cold / Spam, routes it to the right owner with an SLA, and drafts a personalised first reply. It follows the same n8n → LLM → Supabase → Slack pattern I run in production.
+<h1>AI Lead Qualifier</h1>
 
-**Live demo:** https://ai-lead-qualifier-self.vercel.app
+<p>Scores every inbound lead 0 to 100, routes it to the right owner with an SLA, and drafts the first reply in seconds.</p>
 
-![AI Lead Qualifier: intake form, workflow trace and pipeline board](docs/screenshot.png)
+<p>
+  <a href="https://ai-lead-qualifier-self.vercel.app"><img alt="Live demo" src="https://img.shields.io/badge/live%20demo-online-27272a?style=flat&labelColor=18181b"></a>
+  <a href="#n8n-workflow"><img alt="n8n workflow included" src="https://img.shields.io/badge/n8n-workflow%20included-52525b?style=flat&labelColor=18181b"></a>
+  <a href="LICENSE"><img alt="License MIT" src="https://img.shields.io/badge/license-MIT-e4e4e7?style=flat&labelColor=18181b"></a>
+  <img alt="Vercel" src="https://img.shields.io/badge/deploy-Vercel-27272a?style=flat&labelColor=18181b">
+  <img alt="Node 18" src="https://img.shields.io/badge/node-18%2B-52525b?style=flat&labelColor=18181b">
+</p>
 
----
+<p>
+  <a href="https://ai-lead-qualifier-self.vercel.app"><strong>Live demo</strong></a> ·
+  <a href="#n8n-workflow"><strong>n8n workflow</strong></a> ·
+  <a href="#how-it-works"><strong>Architecture</strong></a> ·
+  <a href="#run-locally"><strong>Run locally</strong></a>
+</p>
 
-## The problem
+</div>
 
-Inbound leads come in from forms, ads, LinkedIn, WhatsApp and referrals. They land in a shared inbox or CRM, and someone has to read and triage each one by hand. So:
+<br>
 
-- The **first response takes hours.** For many teams the median is 4–6 hours, and most buyers go with whichever vendor replies first.
-- **Hot leads wait in the same queue as spam** and students doing research.
-- Scoring is **inconsistent**, so it depends on who happens to be on shift.
-- There's **no record of *why*** a lead was prioritised, so you can't tune the funnel.
+![AI Lead Qualifier: lead intake form, n8n workflow trace and routed pipeline board](docs/screenshot.png)
 
-## The solution
+## Overview
 
-A webhook-driven workflow qualifies each lead the moment it arrives:
+Inbound leads arrive from forms, ads, LinkedIn and referrals, then wait in a shared inbox until someone triages them by hand. Hot buyers sit in the same queue as spam, and the first reply often takes hours. This system qualifies each lead the moment it arrives, sends it to the right owner with a reply deadline, and hands the rep a ready-to-send first email.
 
-1. **Normalize & enrich.** Cleans the input, maps budget to USD and timeline to days, and detects the email domain, industry, tools in use, volume and team size.
-2. **LLM score.** An LLM in JSON mode returns the score, tier, confidence, reasons, intent signals, extracted fields and a drafted reply. Its output is validated and clamped against a deterministic rule engine.
-3. **Route by tier:**
-   | Tier | Score | Route | Owner | SLA |
-   |---|---|---|---|---|
-   | 🔥 Hot | 75–100 | AE call | Senior AE | Reply within **15 min** |
-   | 🟠 Warm | 50–74 | Nurture sequence | SDR team | Reply within **4 h** |
-   | 🔵 Cold | 0–49 | Nurture sequence (low-touch) | Marketing automation | Reply within **24 h** |
-   | ⚪ Spam | 0–10 | Disqualify | — | Archived, never pinged |
-4. **Notify + log.** Each lead is written as a row in a Supabase `leads` table. A Slack ping goes to `#sales-hot` / `#sales-warm`, carrying the reasons and the SLA due time.
-5. **Respond.** The form gets its answer, and the rep gets a ready-to-send first email.
+## Highlights
 
-## Business impact (typical / estimated)
+- **Score, tier, reasons.** A 0 to 100 score, Hot / Warm / Cold / Spam tier, confidence, weighted intent signals and 12 extracted fields.
+- **Policy stays deterministic.** LLM output is validated and clamped to its tier band; routing and SLA are always computed server-side.
+- **Drafted first reply.** A personalised email under 120 words, with copy and open-in-mail.
+- **Pipeline dashboard.** Kanban with drag-to-retier and live SLA countdowns, a `public.leads` table view, and KPIs.
+- **Works without keys.** Demo mode returns realistic deterministic results, and the same engine runs in the browser if the API is unreachable.
+- **Production pattern.** Ships with an importable n8n workflow and a Supabase schema with RLS and dashboard views.
 
-| Metric | Before (manual triage) | After | Notes |
-|---|---|---|---|
-| Time to first response | ~4–6 h | **~60% faster** (minutes for Hot leads) | Matches the case study on saitarun.com |
-| Time to qualify + route | minutes per lead | **< 2 s** | Measured in the demo trace |
-| Spam reaching sales Slack | all of it | **~0** | Pattern + LLM filter |
-| Leads with a logged score + reason | rarely | **100%** | Every row in `public.leads` |
-
-*Figures are typical for teams handling 100–2,000 inbound leads a month. They are estimates, not guarantees.*
-
-## Architecture
+## How it works
 
 ```mermaid
 flowchart LR
   A[Lead form / Ads / LinkedIn / WhatsApp] -->|POST| B(Webhook)
-  B --> C[Normalize & enrich<br/>budget→USD · timeline→days · stack]
+  B --> C[Normalize & enrich<br/>budget to USD · timeline to days · stack]
   C --> D{{LLM score<br/>JSON mode}}
   D --> E[Validate & clamp<br/>rule-engine baseline]
   E --> F{Route by tier}
@@ -63,138 +57,114 @@ flowchart LR
   J --> M
 ```
 
-## Features
+1. **Normalize and enrich.** Map budget to USD and timeline to days; detect email domain, industry, tools, volume and team size.
+2. **LLM score.** The model returns score, tier, confidence, reasons, signals, fields and a reply draft in JSON mode.
+3. **Validate.** Tier must be one of four, score is clamped to its band, fields are type-checked.
+4. **Route by tier.** See the table below.
+5. **Log, notify, respond.** Insert into Supabase, ping Slack with reasons and SLA due time, return the result and reply draft.
 
-- **Lead intake form** with name, work email, company, role, budget range, timeline, message and source, plus **4 one-click sample leads** (Hot D2C growth lead, Warm logistics ops, Cold curious student, SEO spam).
-- **Qualification result**: an animated 0–100 score ring, tier, confidence, route (action / owner / channel / next step), SLA with due time, reasons, weighted intent signals, 12 extracted fields, and a **drafted personalised first reply** with copy / open-in-mail.
-- **Workflow trace** that animates step by step (Webhook → Normalize & enrich → LLM score → Route → Slack + CRM → Respond), with per-step timings from the API.
-- **Pipeline dashboard** saved in `localStorage`:
-  - a Hot / Warm / Cold **kanban board**, where you drag a card to re-tier it and click a card to reopen its result. Each card shows a live SLA countdown ("reply due in 12m" / "overdue").
-  - a **Supabase-style table view** of `public.leads`.
-  - **KPIs**: total, Hot, Warm, Cold, Spam blocked, and **average response time** to route.
-- **View JSON** shows the raw API response.
-- **Live AI or Demo mode badge.** The app is fully usable without any API key.
-- Works offline too: if the API isn't reachable, the same engine runs in the browser.
-- Responsive, accessible (keyboard-openable cards, reduced motion), with no build step.
+| Tier | Score | Route | Owner | SLA |
+|---|---|---|---|---|
+| Hot | 75 to 100 | AE call | Senior Account Executive | Reply within 15 min |
+| Warm | 50 to 74 | Nurture sequence | SDR team | Reply within 4 h |
+| Cold | 0 to 49 | Low-touch nurture | Marketing automation | Reply within 24 h |
+| Spam | 0 to 10 | Disqualify | None | Archived, never pinged |
 
-## How it works
+**Guards:** POST only, 8 KB body cap, per-field length limits, control-character stripping, best-effort limit of 20 requests per minute per IP, and a prompt that treats lead text as untrusted. The API key never reaches the client.
 
-| Piece | File |
-|---|---|
-| UI (vanilla JS, ES modules) | `index.html`, `assets/style.css`, `assets/app.js` |
-| Shared scoring engine (rules, extraction, routing, SLA, reply drafts) | `assets/engine.js` |
-| Serverless API | `api/qualify.js`: `POST` qualifies a lead, `GET` returns the mode for the badge |
-| n8n workflow | `n8n/ai-lead-qualifier.n8n.json` |
-| Database | `supabase/schema.sql` |
+## Business impact
 
-**Live vs demo:** when `GEMINI_API_KEY` is set, `/api/qualify` calls Gemini 2.0 Flash (`responseMimeType: application/json`) with the lead and a rule-engine baseline. The answer is then validated: the tier must be one of the four, the score is clamped into its tier's band, and fields are type-checked. Routing and SLA are always computed server-side, so a model can't invent a policy. If the key is missing or the call fails, the API returns a realistic deterministic result with `mode: "demo"`.
+Typical / estimated, for teams handling 100 to 2,000 inbound leads a month. Not guarantees.
 
-**Guards:** POST only, an 8 KB body cap, per-field length limits, control-character stripping, a best-effort per-IP limit of 20 requests a minute, and a prompt that treats lead text as untrusted. The key is never sent to the client.
-
-### API
-
-```http
-POST /api/qualify
-Content-Type: application/json
-
-{ "lead": { "name": "Priya Raman", "email": "priya@brightcart.in", "company": "Brightcart",
-            "role": "Head of Growth", "budget": "15-50k", "timeline": "asap",
-            "source": "referral", "message": "We get ~400 inbound leads a week…" } }
-```
-
-Response (abridged):
-
-```json
-{
-  "mode": "demo", "score": 93, "tier": "Hot", "confidence": 0.96,
-  "reasons": ["Budget $15k – $50k fits a production engagement", "Urgent timeline: ASAP", "..."],
-  "intent_signals": [{ "label": "Decision maker", "polarity": "positive", "weight": 16 }],
-  "extracted": { "industry": "E-commerce / D2C", "use_case": "Lead scoring & routing",
-                 "tools_mentioned": ["HubSpot", "Slack", "WhatsApp", "Shopify"], "volume": "400 leads / week" },
-  "route": { "action": "AE call", "owner": "Senior Account Executive", "channel": "Slack #sales-hot + CRM deal" },
-  "reply": { "subject": "Brightcart × lead scoring & routing — quick call this week?", "body": "Hi Priya, ..." },
-  "sla": { "minutes": 15, "label": "Reply within 15 min", "due_at": "2026-10-31T10:15:00.000Z" },
-  "processing_ms": 1046,
-  "trace": [{ "step": "webhook", "label": "Webhook received", "ms": 6, "detail": "..." }]
-}
-```
-
-Budget ids: `lt1k`, `1-5k`, `5-15k`, `15-50k`, `50k+`, `unsure`. Timeline ids: `asap`, `month`, `1-3m`, `3-6m`, `exploring`. Source ids: `referral`, `webinar`, `website`, `linkedin`, `google-ads`, `outbound`, `other`.
+| Metric | Manual triage | With this system |
+|---|---|---|
+| Time to first response | ~4 to 6 h | ~60% faster, minutes for Hot leads |
+| Time to qualify and route | minutes per lead | under 2 s in the demo trace |
+| Spam reaching sales Slack | all of it | ~0, pattern and LLM filter |
+| Leads with a logged score and reason | rarely | 100%, every row in `public.leads` |
 
 ## Tech stack
 
-- **Frontend:** HTML, CSS and vanilla JS (ES modules), with the Inter font. No framework and no build step.
-- **API:** Vercel Node serverless function (Node 18+, global `fetch`), with zero dependencies.
-- **AI:** Gemini 2.0 Flash via REST in JSON mode (the demo). The n8n workflow uses any OpenAI-compatible API.
-- **Automation:** n8n (Webhook, Set, HTTP Request, Code, IF, Respond to Webhook).
-- **Data:** Supabase Postgres, with RLS, KPI and queue views.
-- **Notify:** Slack Incoming Webhook.
+| Layer | Tools |
+|---|---|
+| Frontend | HTML, CSS, vanilla JS (ES modules), Inter. No framework, no build step |
+| API | Vercel Node serverless function, Node 18+, zero dependencies |
+| AI | Gemini 2.0 Flash in JSON mode (demo); any OpenAI-compatible API in n8n |
+| Automation | n8n: Webhook, Set, HTTP Request, Code, IF, Respond to Webhook |
+| Data | Supabase Postgres with RLS, KPI and queue views |
+| Notify | Slack Incoming Webhook |
+
+## Project structure
+
+```
+ai-lead-qualifier/
+├── index.html                    UI shell
+├── assets/
+│   ├── app.js                    UI logic, result view, workflow trace
+│   ├── engine.js                 Shared scoring engine: rules, extraction, routing, SLA, replies
+│   ├── pipeline.js               Pipeline board and localStorage state
+│   └── style.css
+├── api/qualify.js                POST qualifies a lead · GET returns mode for the badge
+├── n8n/ai-lead-qualifier.n8n.json
+├── supabase/schema.sql
+├── docs/screenshot.png
+└── vercel.json
+```
 
 ## Run locally
 
 ```bash
 git clone https://github.com/Saitarun29/ai-lead-qualifier
 cd ai-lead-qualifier
-npx vercel dev          # → http://localhost:3000  (demo mode without a key)
+npx vercel dev    # http://localhost:3000, demo mode without a key
 ```
 
-For live AI, create a `.env` file with `GEMINI_API_KEY=...` before running `npx vercel dev`. Opening `index.html` through any static server also works; the app falls back to the in-browser engine.
+For live AI, add `GEMINI_API_KEY=...` to `.env` first. Any static server also works; the app falls back to the in-browser engine.
+
+## Configuration
+
+| Variable | Required | Purpose |
+|---|---|---|
+| `GEMINI_API_KEY` | No (Vercel) | Enables live AI scoring. Without it the app runs in demo mode |
+| `OPENAI_API_KEY` | Yes (n8n) | Key for the LLM scoring HTTP Request |
+| `LLM_BASE_URL` | No (n8n) | OpenAI-compatible base URL, default `https://api.openai.com/v1` |
+| `LLM_MODEL` | No (n8n) | Default `gpt-4o-mini` |
+| `SUPABASE_URL` | Yes (n8n) | e.g. `https://xyz.supabase.co` |
+| `SUPABASE_SERVICE_ROLE_KEY` | Yes (n8n) | Server-side insert into `public.leads` |
+| `SLACK_WEBHOOK_URL` | Yes (n8n) | Incoming webhook for sales alerts |
+
+## n8n workflow
+
+[`n8n/ai-lead-qualifier.n8n.json`](n8n/ai-lead-qualifier.n8n.json) contains no secrets; every credential is read from `$env`. Spam leads skip the Supabase insert and Slack ping and are answered as archived.
+
+1. In n8n, open **Workflows · Import from file** and select the JSON.
+2. Set the n8n variables from the table above on your instance.
+3. Run `supabase/schema.sql` in the Supabase SQL editor. It adds `lead_pipeline_kpis` and `lead_queue` views for dashboards.
+4. Activate the workflow and point your form at `https://<your-n8n>/webhook/lead-intake`.
 
 ## Deploy
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/Saitarun29/ai-lead-qualifier&env=GEMINI_API_KEY)
 
-Zero config. Add `GEMINI_API_KEY` for Live AI, or leave it empty to ship in demo mode.
-
-## Environment variables
-
-| Variable | Where | Required | Purpose |
-|---|---|---|---|
-| `GEMINI_API_KEY` | Vercel | optional | Enables Live AI scoring. Without it the app runs in demo mode |
-| `LLM_BASE_URL` | n8n | optional | OpenAI-compatible base URL (default `https://api.openai.com/v1`) |
-| `OPENAI_API_KEY` | n8n | yes (n8n) | Key for the LLM scoring HTTP Request |
-| `LLM_MODEL` | n8n | optional | Default `gpt-4o-mini` |
-| `SUPABASE_URL` | n8n | yes (n8n) | e.g. `https://xyz.supabase.co` |
-| `SUPABASE_SERVICE_ROLE_KEY` | n8n | yes (n8n) | Server-side insert into `public.leads` |
-| `SLACK_WEBHOOK_URL` | n8n | yes (n8n) | Incoming webhook for sales alerts |
-
-## n8n workflow
-
-`n8n/ai-lead-qualifier.n8n.json` is an importable workflow with no secrets; every credential comes from `$env`:
-
-```
-Webhook (POST /lead-intake)
-  → Normalize lead (Set)
-  → LLM score (HTTP Request → {LLM_BASE_URL}/chat/completions, JSON mode)
-  → Parse score + SLA (Code: validate, clamp, attach route + SLA)
-  → IF tier is not Spam
-      ├─ true  → Supabase insert lead (HTTP → /rest/v1/leads) → Slack notify (HTTP) → Respond to Webhook
-      └─ false → Respond (spam archived)
-```
-
-To set it up:
-
-1. In n8n, go to **Workflows → Import from file** and pick the JSON.
-2. Set the env vars above on your n8n instance.
-3. Run `supabase/schema.sql` in the Supabase SQL editor.
-4. Activate the workflow and point your form at `https://<your-n8n>/webhook/lead-intake`.
-
-The schema includes `lead_pipeline_kpis` (counts, average score, average response minutes and SLA breaches per tier) and `lead_queue` (open leads ordered by SLA due time) for dashboards.
+Zero config. Add `GEMINI_API_KEY` for live AI, or leave it empty to ship in demo mode.
 
 ## Roadmap
 
-- [ ] Company enrichment (Clearbit / Apollo) and website scraping before scoring
-- [ ] Round-robin owner assignment and calendar slot booking in the reply
-- [ ] Two-way CRM sync (HubSpot / Zoho / Salesforce) with `first_reply_at` capture
-- [ ] Feedback loop: closed-won data recalibrates the score weights
-- [ ] WhatsApp Business intake and reply channel
+- Company enrichment (Clearbit / Apollo) and website scraping before scoring
+- Round-robin owner assignment and calendar slot booking in the reply
+- Two-way CRM sync (HubSpot / Zoho / Salesforce) with `first_reply_at` capture
+- Feedback loop where closed-won data recalibrates score weights
 
-## Author
+<br>
 
-**Sai Tarun Ronanki**, AI Systems & Agentic Workflows Builder, Hyderabad
+<div align="center">
 
-- 🌐 [saitarun.com](https://saitarun.com) · ✉️ hello@saitarun.com
-- 💼 [LinkedIn](https://linkedin.com/in/ronanki-sai-tarun) · 𝕏 [@SaiTarunRonanki](https://x.com/SaiTarunRonanki) · 📸 [@tarunaistudio](https://instagram.com/tarunaistudio)
-- 💬 [Discuss your workflow on WhatsApp](https://wa.me/918008941430?text=Hello%20Sai%20Tarun%20Ronanki,%20I%20want%20to%20discuss%20about%20my%20workflow)
+Built by **Sai Tarun Ronanki** · AI Systems & Agentic Workflows Builder · Hyderabad
+
+[saitarun.com](https://saitarun.com) · [LinkedIn](https://linkedin.com/in/ronanki-sai-tarun) · [X](https://x.com/SaiTarunRonanki)
+
+**[Discuss your workflow →](https://wa.me/918008941430?text=Hello%20Sai%20Tarun%20Ronanki,%20I%20want%20to%20discuss%20about%20my%20workflow)**
 
 MIT © 2026 Sai Tarun Ronanki
+
+</div>
