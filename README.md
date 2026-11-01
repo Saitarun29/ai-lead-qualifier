@@ -2,7 +2,7 @@
 
 **Every inbound lead scored, routed and answered in seconds, not hours.** An AI qualification system that scores each lead 0–100, sorts it into Hot / Warm / Cold / Spam, routes it to the right owner with an SLA, and drafts a personalised first reply. It follows the same n8n → LLM → Supabase → Slack pattern I run in production.
 
-**Live demo:** https://ai-lead-qualifier.vercel.app
+**Live demo:** https://ai-lead-qualifier-self.vercel.app
 
 ![AI Lead Qualifier: intake form, workflow trace and pipeline board](docs/screenshot.png)
 
