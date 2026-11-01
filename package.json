@@ -1,0 +1,7 @@
+{
+  "name": "ai-lead-qualifier",
+  "description": "AI-powered lead qualification: scoring, tiering, routing and first-reply drafting. n8n + LLM + Supabase pattern.",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module"
+}
