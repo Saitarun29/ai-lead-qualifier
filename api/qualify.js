@@ -80,6 +80,18 @@ async function callGemini(lead, baseline, key) {
   }
 }
 
+// One retry on a transient Gemini failure (network error, 429 or 5xx).
+// If both attempts fail the handler falls back to the rule engine —
+// the lead still gets scored and routed, it just is not lost.
+async function callGeminiWithRetry(lead, baseline, key) {
+  try {
+    return await callGemini(lead, baseline, key);
+  } catch (firstErr) {
+    await new Promise((r) => setTimeout(r, 400));
+    return callGemini(lead, baseline, key);
+  }
+}
+
 function mergeLive(lead, baseline, ai) {
   const tier = TIERS.includes(ai?.tier) ? ai.tier : baseline.tier;
   let score = Number(ai?.score);
@@ -156,7 +168,7 @@ export default async function handler(req, res) {
   const baseline = scoreLead(lead);
   const t0 = Date.now();
   try {
-    const ai = await callGemini(lead, baseline, process.env.GEMINI_API_KEY);
+    const ai = await callGeminiWithRetry(lead, baseline, process.env.GEMINI_API_KEY);
     const scoreMs = Date.now() - t0;
     const merged = mergeLive(lead, baseline, ai);
     const result = finalize(lead, merged, {

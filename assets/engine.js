@@ -262,7 +262,7 @@ export function scoreLead(lead) {
   else { score += 5; signals.push({ label: "Role unclear", polarity: "neutral", weight: 5 }); }
 
   score += s.pts;
-  if (s.pts >= 10 && s.id === "referral") { reasons.push(`${s.label} source converts ~2–3× better than paid (typical)`); signals.push({ label: `${s.label} source`, polarity: "positive", weight: s.pts }); }
+  if (s.pts >= 10 && s.id === "referral") { reasons.push(`${s.label} source — came in on a personal introduction`); signals.push({ label: `${s.label} source`, polarity: "positive", weight: s.pts }); }
   else signals.push({ label: `${s.label} source`, polarity: "neutral", weight: s.pts });
 
   const lower = lead.message.toLowerCase();
@@ -307,7 +307,7 @@ export function draftReply(lead, tier, ex) {
   if (tier === "Warm") {
     return {
       subject: `Ideas for ${uc} at ${co}`,
-      body: `Hi ${fn},\n\nThanks for the note about ${uc}${inTools}. Teams like ${co} usually start with one high-volume workflow, automate the triage step, and expand once the numbers are proven.\n\nHere's a short case study where a similar setup cut first-response time by ~60%: https://saitarun.com. If it resonates, I'm happy to put together a scoped proposal — would a kickoff inside your ${tl} work?\n\nBest,\nSai Tarun`,
+      body: `Hi ${fn},\n\nThanks for the note about ${uc}${inTools}. Teams like ${co} usually start with one high-volume workflow, automate the triage step, and expand once the numbers are proven.\n\nI can share a short walkthrough of how the scoring and routing is set up: https://saitarun.com. If it fits, I'm happy to put together a scoped proposal — would a kickoff inside your ${tl} work?\n\nBest,\nSai Tarun`,
     };
   }
   return {

@@ -1,7 +1,1 @@
-{
-  "name": "ai-lead-qualifier",
-  "description": "AI-powered lead qualification: scoring, tiering, routing and first-reply drafting. n8n + LLM + Supabase pattern.",
-  "version": "1.0.0",
-  "private": true,
-  "type": "module"
-}
+{"description":"Lead qualification for inbound enquiries: explicit-rule scoring with an LLM pass, tier routing with SLAs, and a drafted first reply. n8n + Gemini/OpenAI-compatible LLM + Supabase.","engines":{"node":">=18"},"name":"ai-lead-qualifier","private":true,"scripts":{"dev":"python3 -m http.server 3000","smoke":"node scripts/smoke.mjs","test":"node scripts/smoke.mjs"},"type":"module","version":"1.1.0"}

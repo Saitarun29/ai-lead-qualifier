@@ -10,8 +10,8 @@
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://ai-lead-qualifier-self.vercel.app" />
   <meta name="twitter:card" content="summary" />
-  <meta name="theme-color" content="#F7F7F5" />
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23111111'/%3E%3Cpath d='M9 21V11M9 21h7M19 21l4-10' stroke='%23ffffff' stroke-width='2.4' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E" />
+  <meta name="theme-color" content="#16202A" />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23145C38'/%3E%3Cpath d='M9 21V11M9 21h7M19 21l4-10' stroke='%23ffffff' stroke-width='2.4' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" />
@@ -45,7 +45,7 @@
     <div class="page-head">
       <div>
         <h1>Inbound leads</h1>
-        <p class="muted">Each lead is scored, tiered and routed with an SLA. Pick a sample or enter your own.</p>
+        <p class="muted">Each lead is scored, tiered and routed with an SLA. Pick a sample or enter your own. All sample leads on this page are fictional.</p>
       </div>
       <button type="button" class="btn btn-ghost btn-sm" id="resetPipe">Reset sample data</button>
     </div>
@@ -57,7 +57,7 @@
       <div class="kpi"><span class="kpi-label"><i class="dot dot-cold"></i>Cold</span><b class="num" id="kCold">0</b></div>
       <div class="kpi"><span class="kpi-label"><i class="dot dot-spam"></i>Spam blocked</span><b class="num" id="kSpam">0</b></div>
       <div class="kpi"><span class="kpi-label">Overdue replies</span><b class="num" id="kOverdue">0</b></div>
-      <div class="kpi"><span class="kpi-label">Avg time to route</span><b class="num" id="kAvg">—</b><small class="muted">vs ~4 h manual (typical)</small></div>
+      <div class="kpi"><span class="kpi-label">Avg time to route</span><b class="num" id="kAvg">—</b><small class="muted">webhook to routed, this board</small></div>
     </section>
 
     <div class="layout">
@@ -116,7 +116,7 @@
 
         <div class="state" id="resEmpty">
           <p><b>No lead selected</b></p>
-          <p class="muted">Pick a sample above or submit the form to see the score, route and drafted reply.</p>
+          <p class="muted">Pick a fictional sample above or submit the form to see the score, route and drafted reply.</p>
         </div>
         <div class="state" id="resLoading" hidden>
           <div class="skeleton w40"></div><div class="skeleton w80"></div><div class="skeleton w60"></div><div class="skeleton w70"></div>
@@ -200,7 +200,7 @@
           <li data-step="respond"><span class="node" aria-hidden="true"></span><div class="step"><b>Respond to webhook</b><small>200 OK to the form</small></div><em class="num">—</em></li>
         </ol>
         <div class="trace-foot muted">
-          <p>Typical impact, estimated: about 60% faster first response than manual triage, and no spam in the sales channel.</p>
+          <p>Spam is archived before it reaches Slack. Every other lead leaves this run with an owner, a channel and a reply due time.</p>
         </div>
       </section>
     </div>
@@ -236,11 +236,12 @@
 
   <footer class="footer">
     <div class="wrap footer-inner">
-      <p>Built by Sai Tarun · <a href="https://saitarun.com" target="_blank" rel="noopener">saitarun.com</a></p>
+      <p>Built by Sai Tarun Ronanki, Hyderabad · <a href="https://saitarun.com" target="_blank" rel="noopener">saitarun.com</a> · <a href="mailto:hello@saitarun.com">hello@saitarun.com</a></p>
       <nav aria-label="Author links">
         <a href="https://saitarun.com" target="_blank" rel="noopener">Site</a>
-        <a href="https://linkedin.com/in/ronanki-sai-tarun" target="_blank" rel="noopener">LinkedIn</a>
+        <a href="https://www.linkedin.com/in/saitarunronanki" target="_blank" rel="noopener">LinkedIn</a>
         <a href="https://x.com/SaiTarunRonanki" target="_blank" rel="noopener">X</a>
+        <a href="https://www.instagram.com/tarunaistudio" target="_blank" rel="noopener">Instagram</a>
         <a href="https://github.com/Saitarun29/ai-lead-qualifier" target="_blank" rel="noopener">GitHub</a>
         <a class="btn btn-primary btn-sm" href="https://wa.me/918008941430?text=Hello%20Sai%20Tarun%20Ronanki,%20I%20want%20to%20discuss%20about%20my%20workflow" target="_blank" rel="noopener">Discuss your workflow</a>
       </nav>

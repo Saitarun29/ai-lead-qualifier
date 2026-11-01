@@ -15,9 +15,9 @@ const PRESETS = [
     message: "We get ~400 inbound leads a week across Shopify, Meta lead forms and WhatsApp. 3 SDRs triage them manually in HubSpot and our median response time is about 6 hours, so hot leads go cold. We want AI scoring + routing to Slack live before our festive sale launch. Can we get on a call this week?",
   },
   {
-    name: "Daniel Okafor", email: "daniel.okafor@northwindlogistics.com", company: "Northwind Logistics", role: "Operations Manager",
+    name: "Vikram Shetty", email: "vikram@kaverifreight.in", company: "Kaveri Freight", role: "Operations Manager",
     budget: "5-15k", timeline: "1-3m", source: "linkedin",
-    message: "Exploring ways to automate our quote request intake. Requests come in by email and a web form, then get copied into Zoho CRM by hand. We're a 12 person sales team. Would like to understand costs and see a rough proposal.",
+    message: "Exploring ways to automate our quote request intake. Requests come in by email and a web form from our Bengaluru and Chennai branches, then get copied into Zoho CRM by hand. We're a 12 person sales team. Would like to understand costs and see a rough proposal.",
   },
   {
     name: "Meera Joshi", email: "meera.j2002@gmail.com", company: "", role: "Marketing Intern",
@@ -31,11 +31,11 @@ const PRESETS = [
   },
 ];
 
-// Sample history so the dashboard is never empty on first visit.
+// Fictional sample history so the dashboard is never empty on first visit. Names and companies are invented.
 const SEEDS = [
   { age: 4, replied: null, lead: { name: "Arjun Mehta", email: "arjun@ledgerly.io", company: "Ledgerly", role: "Founder & CEO", budget: "15-50k", timeline: "month", source: "website", message: "Our demo request form gets ~120 leads a month and lands in a shared inbox. We want every lead scored and enriched, pushed into HubSpot, with a Slack ping for the good ones. Can you share a proposal and timeline?" } },
-  { age: 38, replied: 7, lead: { name: "Sara Khan", email: "sara@kestrelrealty.ae", company: "Kestrel Realty", role: "VP Sales", budget: "50k+", timeline: "asap", source: "referral", message: "We handle 2,000 property inquiries a month from portals and WhatsApp. Agents respond in 5 hours on average and we lose buyers. Need AI routing to the right agent by area and budget, integrated with Salesforce. Deadline is our Q1 launch — let's do a call." } },
-  { age: 125, replied: 52, lead: { name: "Tom Becker", email: "tom.becker@lumenclinics.com", company: "Lumen Clinics", role: "Marketing Manager", budget: "5-15k", timeline: "1-3m", source: "webinar", message: "Saw your webinar. We'd like to automate follow-up for patient inquiries from Google Ads and our site into our CRM. Not sure about the exact scope yet." } },
+  { age: 38, replied: 7, lead: { name: "Sara Khan", email: "sara@kestrelrealty.in", company: "Kestrel Realty", role: "VP Sales", budget: "50k+", timeline: "asap", source: "referral", message: "We handle 2,000 property inquiries a month from portals and WhatsApp across Hyderabad. Agents respond in 5 hours on average and we lose buyers. Need AI routing to the right agent by area and budget, integrated with Salesforce. Deadline is our Q1 launch — let's do a call." } },
+  { age: 125, replied: 52, lead: { name: "Divya Nair", email: "divya@aarogyaclinics.in", company: "Aarogya Clinics", role: "Marketing Manager", budget: "5-15k", timeline: "1-3m", source: "webinar", message: "Saw your webinar. We'd like to automate follow-up for patient inquiries from Google Ads and our site into our CRM. Not sure about the exact scope yet." } },
   { age: 310, replied: 95, lead: { name: "Ananya Rao", email: "ananya@pixelandpine.co", company: "Pixel & Pine", role: "Head of Operations", budget: "1-5k", timeline: "3-6m", source: "linkedin", message: "Agency with 25 people. Looking at automating client reporting and lead intake workflow with n8n at some point next year." } },
   { age: 560, replied: 410, lead: { name: "Rohit Verma", email: "rohit.v@outlook.com", company: "Freelance", role: "Analyst", budget: "unsure", timeline: "exploring", source: "google-ads", message: "Interested in learning what AI agents can do for small businesses. Any tutorial?" } },
   { age: 1500, replied: null, lead: { name: "Crypto Alpha", email: "vip@alpha-signals.xyz", company: "Alpha Signals", role: "Promoter", budget: "unsure", timeline: "asap", source: "other", message: "GET 10X RETURNS WITH OUR CRYPTO SIGNALS!!! Click here http://alpha-signals.xyz http://t.me/alpha now" } },
@@ -352,7 +352,7 @@ function render() {
         <p>${esc(e.company || "No company")} · ${esc(e.route)}</p>
         <div class="meta"><span>${ago(e.created_at)} ${tag}</span><span class="num due-${d.state}">${esc(d.t)}</span></div>
       </article>`;
-    }).join("") : `<div class="lane-empty">No ${tier.toLowerCase()} leads</div>`;
+    }).join("") : `<div class="lane-empty">No ${tier.toLowerCase()} leads yet. Leads routed here will show up in this lane.</div>`;
   });
 
   $("#rowCount").textContent = `${pipeline.length} ${pipeline.length === 1 ? "lead" : "leads"}`;
